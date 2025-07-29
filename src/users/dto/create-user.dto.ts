@@ -13,7 +13,7 @@ export class CreateUserDto {
     password: string;
 
     @IsString()
-    @IsIn(['user', 'admin'])
+    @IsIn(['user', 'admin', "manager"])
     role: string;
 }
 
@@ -28,6 +28,6 @@ export class UpdateUserDto {
     password?: string;
 
     @IsString()
-    @IsIn(['user', 'admin'])
+    @IsIn(['user', 'admin', "manager"])
     role?: string;
 }

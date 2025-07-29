@@ -18,10 +18,12 @@ export class AuthController {
 
     @UseGuards(AuthGuard('jwt'))
     @Get('profile')
-    getProfile(@Request() req) {
+    async getProfile(@Request() req) {
+        const userId = req.user.userId;
+        const user = await this.authService.findById(userId);
         return {
             message: 'User profile info',
-            user: req.user,
+            user,
         };
     }
 }

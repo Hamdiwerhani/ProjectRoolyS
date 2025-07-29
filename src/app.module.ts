@@ -4,9 +4,10 @@ import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [MongooseModule.forRoot(process.env.MONGO_URI || "mongodb://localhost:27017/projectRoolyS"), AuthModule, UsersModule,],
+  imports: [ConfigModule.forRoot({ isGlobal: true }), MongooseModule.forRoot(process.env.MONGO_URI || "mongodb://localhost:27017/projectRoolyS"), AuthModule, UsersModule,],
   controllers: [AppController],
   providers: [AppService],
 })
