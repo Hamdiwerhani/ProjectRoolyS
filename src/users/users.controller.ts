@@ -19,7 +19,7 @@ import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @Roles(Role.Admin)
   @Post()
