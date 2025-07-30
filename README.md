@@ -24,6 +24,30 @@
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+echo "# Project Role-Based Access Control API
+
+A NestJS API with JWT authentication and role-based access control (RBAC) supporting user and project management.
+
+## Features
+
+- **Authentication**: Signup/login with JWT and hashed passwords.
+- **Roles**: Admin, Manager, User with different permissions.
+- **Projects**: CRUD projects with ownership, tags, status, sharing, pagination, and filtering.
+- **Users**: Admin-managed user creation and updates.
+- **Guards & Middleware**: Protect routes by roles; logs requests with method, path, and timestamp.
+
+## Setup
+
+1. Install dependencies: \`npm install\`
+2. Configure \`.env\` with DB and JWT secrets
+3. Start server: \`npm run start:dev\`
+
+## RBAC Summary
+
+- **Users** manage their own projects.
+- **Managers** view all projects.
+- **Admins** manage all users and projects.
+  "
 
 ## Project setup
 

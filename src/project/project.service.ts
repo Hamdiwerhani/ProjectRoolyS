@@ -9,6 +9,8 @@ export class ProjectService {
         @InjectModel(Project.name) private projectModel: Model<ProjectDocument>,
     ) { }
 
+    // Create a new project for a user
+    // param data project info with owner ID
     async create(data: {
         name: string;
         description?: string;
@@ -23,6 +25,7 @@ export class ProjectService {
         return project.save();
     }
 
+    // Find all projects owned by a user with optional search, pagination
     async findAll(ownerId: string, page = 1, limit = 10, search = '') {
         const skip = (page - 1) * limit;
         const query = {
@@ -44,6 +47,7 @@ export class ProjectService {
         };
     }
 
+    // Share a project with another user by ID and assign permissions
     async shareProject(projectId: string, userId: string, permissions: string[]) {
         const project = await this.projectModel.findById(projectId);
         if (!project) throw new NotFoundException('Project not found');
