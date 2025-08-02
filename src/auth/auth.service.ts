@@ -17,18 +17,30 @@ export class AuthService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
-  async signup(email: string, password: string) {
+  async signup(name: string, email: string, password: string , role: string = 'admin') {
     try {
+      const existingUser = await this.userModel.findOne({ email });
+      if (existingUser) {
+        throw new UnauthorizedException('Email already exists');
+      }
+      const saltRounds = parseInt(
+        this.configService.get<string>('BCRYPT_SALT') || '10',
+        10,
+      );
       const hashedPassword = await bcrypt.hash(
         password,
-        this.configService.get<string>('BCRYPT_SALT'),
+        saltRounds,
       );
-      const user = new this.userModel({ email, password: hashedPassword });
+
+      const user = new this.userModel({ name, email, password: hashedPassword, role });
       await user.save();
       return { message: 'User registered successfully' };
     } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
       throw new InternalServerErrorException('Signup failed');
     }
   }

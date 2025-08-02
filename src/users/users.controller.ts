@@ -15,7 +15,10 @@ import { RolesGuard } from '../common/guards/roles.guard';
 import { Role } from './roles.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
+import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiTags('users')
+@ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('users')
 export class UsersController {
@@ -48,6 +51,12 @@ export class UsersController {
   @Roles(Role.Admin, Role.User)
   @Get('me')
   findMyInfo(@Request() req) {
-    return this.usersService.findById(req.user.userId);
+    return this.usersService.findByInfo(req.user.userId);
+  }
+
+  @Roles(Role.Admin, Role.User)
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.usersService.findById(id);
   }
 }

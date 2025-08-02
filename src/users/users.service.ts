@@ -47,7 +47,7 @@ export class UsersService {
     }
   }
 
-  async findById(id: string): Promise<User> {
+  async findByInfo(id: string): Promise<User> {
     try {
       const user = await this.userModel.findById(id).select('-password');
       if (!user) throw new NotFoundException('User not found');
@@ -92,5 +92,13 @@ export class UsersService {
         ? error
         : new InternalServerErrorException('Failed to delete user');
     }
+  }
+
+  async findById(id: string) {
+    const user = await this.userModel.findById(id).select('-password');
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
   }
 }
