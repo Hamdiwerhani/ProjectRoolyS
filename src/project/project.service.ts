@@ -178,4 +178,11 @@ export class ProjectService {
 
     return project.save();
   }
+
+  async findByTag(tag: string) {
+    return this.projectModel
+      .find({ tags: tag })
+      .populate('owner', 'name email')
+      .exec();
+  }
 }

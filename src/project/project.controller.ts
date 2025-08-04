@@ -117,4 +117,11 @@ export class ProjectController {
   ) {
     return this.projectService.shareProjectWithUser(projectId, shareProjectDto);
   }
+
+  @Get('by-tag/:tag')
+  @ApiOperation({ summary: 'List all projects by tag (category)' })
+  @ApiResponse({ status: 200, description: 'Projects with the given tag' })
+  getProjectsByTag(@Param('tag') tag: string) {
+    return this.projectService.findByTag(tag);
+  }
 }
