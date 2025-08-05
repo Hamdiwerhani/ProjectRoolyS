@@ -1,11 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import {
-  IsString,
-  IsOptional,
-  IsArray,
-  IsMongoId,
-  IsIn,
-} from 'class-validator';
+import { IsString, IsOptional, IsArray, IsIn } from 'class-validator';
 
 export class CreateProjectDto {
   @ApiProperty({ example: 'New Website' })
@@ -20,10 +14,6 @@ export class CreateProjectDto {
   @ApiPropertyOptional({
     description: 'Set automatically from authenticated user',
   })
-  @IsOptional()
-  @IsMongoId()
-  owner: string;
-
   @ApiProperty({
     example: ['frontend', 'urgent'],
     required: false,

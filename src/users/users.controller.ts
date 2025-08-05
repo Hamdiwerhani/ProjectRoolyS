@@ -16,13 +16,14 @@ import { Role } from './roles.enum';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateUserDto, UpdateUserDto } from './dto/create-user.dto';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
+import { Request as ExpressRequest } from 'express';
 
 @ApiTags('users')
 @ApiBearerAuth()
 @UseGuards(AuthGuard('jwt'), RolesGuard)
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Roles(Role.Admin)
   @Post()
@@ -50,8 +51,8 @@ export class UsersController {
 
   @Roles(Role.Admin, Role.User)
   @Get('me')
-  findMyInfo(@Request() req) {
-    return this.usersService.findByInfo(req.user.userId);
+  findMyInfo(@Request() req: ExpressRequest) {
+    return this.usersService.findByInfo(req.user.sub);
   }
 
   @Roles(Role.Admin, Role.User)

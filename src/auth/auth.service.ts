@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import {
   Injectable,
   InternalServerErrorException,
@@ -6,35 +5,42 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { isValidObjectId, Model } from 'mongoose';
+import { isValidObjectId, Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import * as jwt from 'jsonwebtoken';
 import { User, UserDocument } from 'src/schemas/user.schema';
-import { ConfigService } from '@nestjs/config';
+import { LoginDto } from './dto/login.dto';
+import { RegisterDto } from './dto/register.dto';
+import {
+  LoginResponse,
+  SignupResponse,
+} from 'src/types/auth-response.interface';
 
 @Injectable()
 export class AuthService {
-  constructor(
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
-    private configService: ConfigService,
-  ) { }
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) { }
 
-  async signup(name: string, email: string, password: string , role: string = 'admin') {
+  async signup(registerDto: RegisterDto): Promise<SignupResponse> {
     try {
-      const existingUser = await this.userModel.findOne({ email });
+      const existingUser = await this.userModel.findOne({
+        email: registerDto.email,
+      });
       if (existingUser) {
         throw new UnauthorizedException('Email already exists');
       }
-      const saltRounds = parseInt(
-        this.configService.get<string>('BCRYPT_SALT') || '10',
-        10,
-      );
-      const hashedPassword = await bcrypt.hash(
-        password,
-        saltRounds,
-      );
+      const saltRounds = parseInt(process.env.BCRYPT_SALT || '10', 10);
 
-      const user = new this.userModel({ name, email, password: hashedPassword, role });
+      const hashedPassword = (await bcrypt.hash(
+        registerDto.password,
+        saltRounds,
+      )) as string;
+
+      const user = new this.userModel({
+        name: registerDto.name,
+        email: registerDto.email,
+        password: hashedPassword,
+        role: 'admin',
+      });
       await user.save();
       return { message: 'User registered successfully' };
     } catch (error) {
@@ -45,30 +51,33 @@ export class AuthService {
     }
   }
 
-  async login(email: string, password: string) {
+  async login(loginDto: LoginDto): Promise<LoginResponse> {
     try {
-      const user = await this.userModel.findOne({ email });
+      const user: UserDocument | null = await this.userModel.findOne({
+        email: loginDto.email,
+      });
       const isPasswordMatch =
-        user && (await bcrypt.compare(password, user.password));
+        user &&
+        ((await bcrypt.compare(loginDto.password, user.password)) as boolean);
 
       if (!user || !isPasswordMatch) {
         throw new UnauthorizedException('Invalid credentials');
       }
 
       const payload = { sub: user._id, email: user.email, role: user.role };
-      const token = jwt.sign(
-        payload,
-        this.configService.get<string>('JWT_SECRET') || 'SECRET_KEY',
-        {
-          expiresIn: this.configService.get<string>('JWT_EXPIRES_IN'),
-        },
-      );
+      const token = jwt.sign(payload, process.env.JWT_SECRET || 'SECRET_KEY', {
+        expiresIn: process.env.JWT_EXPIRES_IN,
+      });
 
       return {
         token,
-        user: { userId: user.id, email: user.email, role: user.role },
+        user: {
+          userId: (user._id as Types.ObjectId).toString(),
+          email: user.email,
+          role: user.role,
+        },
       };
-    } catch (error) {
+    } catch (error: unknown) {
       throw error instanceof UnauthorizedException
         ? error
         : new InternalServerErrorException('Login failed');
@@ -85,7 +94,11 @@ export class AuthService {
       }
       return user;
     } catch (error) {
-      throw new InternalServerErrorException('Error fetching user');
+      console.log(error);
+
+      throw new InternalServerErrorException(
+        `Failed to create project: ${error instanceof Error ? error.message : ''}`,
+      );
     }
   }
 }
